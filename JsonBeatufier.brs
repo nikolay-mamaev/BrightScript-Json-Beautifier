@@ -12,16 +12,20 @@ Function BeautifyJsonString(jsonString As String, indentSpacesNumber = 4) As Str
     tabChar = Chr(9)
     indentString = String(indentSpacesNumber, spaceChar)
     indentLevel = 0
-    isCharBetweenQuotes = false
-
     beautifiedJsonString = ""
 
-    For i = 1 To Len(jsonString)
+    i = 1
+    While i <= Len(jsonString)
         curChar = Mid(jsonString, i, 1)
         If curChar = quoteChar Then
-            isCharBetweenQuotes = NOT(isCharBetweenQuotes)
-            beautifiedJsonString = beautifiedJsonString + curChar
-        Else If NOT(isCharBetweenQuotes) Then
+            indexOfClosingQuote = Instr(i + 1, jsonString, quoteChar)
+            If indexOfClosingQuote > 0 Then
+                beautifiedJsonString = beautifiedJsonString + Mid(jsonString, i, indexOfClosingQuote - i + 1)
+                i = indexOfClosingQuote
+            Else
+                beautifiedJsonString = beautifiedJsonString + curChar
+            End If
+        Else
             If curChar = dictionaryStartChar OR curChar = arrayStartChar Then
                 indentLevel = indentLevel + 1
                 beautifiedJsonString = beautifiedJsonString + curChar + newLineChar + String(indentLevel, indentString)
@@ -38,10 +42,10 @@ Function BeautifyJsonString(jsonString As String, indentSpacesNumber = 4) As Str
             Else If NOT(curChar = spaceChar OR curChar = tabChar OR curChar = newLineChar OR curChar = carriageReturnChar) Then
                 beautifiedJsonString = beautifiedJsonString + curChar
             End If
-        Else
-            beautifiedJsonString = beautifiedJsonString + curChar
         End If
-    End For
+
+        i = i + 1
+    End While
 
     return beautifiedJsonString
 End Function
